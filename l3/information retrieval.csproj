@@ -43,9 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ex.2.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="Lexer.cs" />
     <Compile Include="ex.4.cs" />
     <Compile Include="ex.5.cs" />
+    <Compile Include="Index.cs" />
+    <Compile Include="ex6.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

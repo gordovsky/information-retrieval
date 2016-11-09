@@ -1,47 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Index
+namespace Lexer
 {
-    public interface IRanker
-    {
-        IList<long> Rank(string[] terms, System.Collections.Generic.IEnumerable<long> hits);
-        Dictionary<long, double> Scores { get; }
-    }
     public interface ILexer
     {
         IEnumerable<string> Tokenize(string document);
     }
-    public interface IParser
+    public class BasicLexer //: ILexer
     {
-        IEnumerable<Document> ExtractDocuments(Stream file);
-    }
-    public class Document
-    {
-        public Document(string docId, string title, string body)
-        {
-            this.SpecialIdentifier = docId;
-            this.Body = body;
-            this.Title = title;
-        }
-
-        public string SpecialIdentifier { get; private set; }
-        public string Body { get; private set; }
-        public string Title { get; private set; }
-    }
-    public class BasicLexer : ILexer
-    {
-        HashSet<char> ignoreList = new HashSet<char>();
+        HashSet<char> ignoreList = new HashSet<char>("\t\n.,\r-;:|()[]?! <>?&•�*\"".ToCharArray());
         private string[] stopList;
 
         public BasicLexer()
         {
-            char[] ignore = "\t\n.,\r-;:|()[]?! <>\"".ToCharArray();
-            foreach (char c in ignore)
-                this.ignoreList.Add(c);
             this.stopList =
                 ("a,able,about,across,after,all,almost,also,am,among,an,and," +
                 "any,are,as,at,be,because,been,but,by,can,cannot,could,dear," +
@@ -58,7 +31,7 @@ namespace Index
         private bool isValidTerm(string term)
         {
             return !this.stopList.Contains(term) &&
-                !term.Contains("&") &&
+                //!term.Contains("&") &&
                 term.Length > 1;
         }
         
@@ -73,10 +46,8 @@ namespace Index
                     {
                         string result = token.ToString().ToLower();
                         token.Clear();
-                        if (this.isValidTerm(result))    // dont return stop words
-                        {
+                        if (isValidTerm(result))
                             yield return result;
-                        }
                     }
                 }
                 else
@@ -84,21 +55,10 @@ namespace Index
                     token.Append(character);
                 }
             }
-
             if (token.Length > 0)
             {
                 yield return token.ToString().ToLower();
             }
-        }
-    }
-    class InvertedIndex
-    {
-        public static Dictionary<TItem, IEnumerable<TKey>> Invert<TKey, TItem>(Dictionary<TKey, IEnumerable<TItem>> dictionary)
-        {
-            return dictionary
-                .SelectMany(keyValuePair => keyValuePair.Value.Select(item => new KeyValuePair<TItem, TKey>(item, keyValuePair.Key)))
-                .GroupBy(keyValuePair => keyValuePair.Key)
-                .ToDictionary(group => group.Key, group => group.Select(keyValuePair => keyValuePair.Value));
         }
     }
 }
