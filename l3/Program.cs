@@ -6,6 +6,7 @@ using Index;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Archiving;
 
 namespace Program
 {
@@ -22,48 +23,35 @@ namespace Program
             string littleDataSetPath = @"C:\Users\col403\Desktop\ir\little data set";
             string wikiDataSetPath = @"C:\Users\col403\Desktop\ir\wiki data set";
             string certainDocumentPath = @"C:\Users\col403\Desktop\ir\little data set\10.txt";
+            string reutersPath= @"C:\Users\col403\Desktop\ir\reuters21578";
 
-            //string document = File.ReadAllText(certainDocumentPath);
+
 
             List<Document> documents = new List<Document>();
-            int i = 1;
+            int id = 1;
             foreach (string doc in Directory.GetFiles(littleDataSetPath))
             {
                 string text = File.ReadAllText(doc);
-                documents.Add(new Document(i, Path.GetFileName(doc), text));
-                i++;
+                documents.Add(new Document(id, Path.GetFileName(doc), text));
+                id++;
             }
 
             InvertedIndex index = new InvertedIndex(documents);
+            
+            Compressor compressor = new Compressor(index);
+            compressor.WriteCompressedStringToFile(@"C:\Users\col403\Desktop\ir\");
 
-            var indexElement1 = index.GetByIndex(2400);
-            var indexElement2 = index.GetByIndex(2900);
-            //Tuple<string, List<int>> example1 = new Tuple<string, List<int>>(index[2000]);
-            //BasicLexer lexer = new BasicLexer();
-
-
-           
-            //foreach (var w in lexer.Tokenize(document))
-            //    Console.WriteLine(w);
-            //string[]  = Directory.GetFiles(dataPath);
-
-            //string[] paths = Directory.GetFiles(dataPath);
+            //index.WriteStringToFile(@"C:\Users\col403\Desktop\ir\");
 
 
+            var indexElement1 = index.Dictionary.ElementAt(2500);
+            var indexElement2 = index.Dictionary.ElementAt(3990);
 
-            //string[] files = Directory.GetFiles(dataPath);
-            //Console.Write("find: ");
-            //var find = Console.ReadLine();
-
-            //var dictionary = files.ToDictionary(file => file, file => File.ReadAllText(file).Split().AsEnumerable());
-
-            //var invertredDict = InvertedIndex.Invert(dictionary);
-            //Console.WriteLine("{0} found in: {1}", find, string.Join(" ", InvertedIndex.Invert(dictionary)[find]));
 
             stopwatch.Stop();
             Console.WriteLine("elapsed time: {0}", stopwatch.ElapsedMilliseconds);
             Console.WriteLine("end...");
-
+            Console.ReadKey();
         }
     }
 }

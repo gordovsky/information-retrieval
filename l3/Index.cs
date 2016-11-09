@@ -7,20 +7,16 @@ using System.IO;
 
 namespace Index
 {
-    //class InvertedIndex
-    //{
-    //    public static Dictionary<TItem, IEnumerable<TKey>> Invert<TKey, TItem>(Dictionary<TKey, IEnumerable<TItem>> dictionary)
-    //    {
-    //        return dictionary
-    //            .SelectMany(keyValuePair => keyValuePair.Value.Select(item => new KeyValuePair<TItem, TKey>(item, keyValuePair.Key)))
-    //            .GroupBy(keyValuePair => keyValuePair.Key)
-    //            .ToDictionary(group => group.Key, group => group.Select(keyValuePair => keyValuePair.Value));
-    //    }
-    //}
     class InvertedIndex
     {
-        SortedDictionary<string, List<int>> index = new SortedDictionary<string, List<int>>();
-        public InvertedIndex(List<Document> documents) //(Dictionary<string, string> files)
+        public SortedList<string, int> Dictionary = new SortedList<string, int>();
+        public List<List<int>> Index = new List<List<int>>();
+        //public Dictionary<int, List<int>> Index = new Dictionary<int, List<int>>();
+        public int Count
+        {
+            get { return Dictionary.Count; }
+        }
+        public InvertedIndex(List<Document> documents) 
         {
             foreach (var doc in documents)
             {
@@ -28,23 +24,34 @@ namespace Index
                 BasicLexer lexer = new BasicLexer();
                 foreach (var lex in lexer.Tokenize(text))
                 {
-                    if (!index.ContainsKey(lex))
-                        index.Add(lex, new List<int>(new int[] {doc.Id}));
+                    if (!Dictionary.ContainsKey(lex))
+                    { 
+                        Dictionary.Add(lex, Dictionary.Count);
+                        Index.Add(new List<int>(doc.Id)); //Add(Dictionary.Count, new List<int>(doc.Id));
+                    }
                     else
                     {
-                        if (!index[lex].Contains(doc.Id))
-                            index[lex].Add(doc.Id);
+                        //var r = Dictionary.IndexOfKey(lex);
+                        //var i = Index[r];
+                        if (!Index[Dictionary[lex]].Contains(doc.Id))
+                            Index[Dictionary.IndexOfKey(lex)].Add(doc.Id);
                     }
                 }
             }
         }
-        public KeyValuePair<string, List<int>> GetByIndex(int ind)
+        public KeyValuePair<string, int> GetByIndex(int ind)
         {
-            return index.ElementAt(ind);
+            return Dictionary.ElementAt(ind);
         }
-        public int GetCount()
-        {
-            return index.Count();
-        }
+        //public override string ToString()
+        //{
+        //    StringBuilder stringIndex = new StringBuilder();
+        //    foreach (var term in Index)
+        //    {
+        //        stringIndex.Append(term.Key + ":" + string.Join(",",term.Value.ToArray()) + ";");
+        //    }
+        //    return stringIndex.ToString();
+        //}
+
     }
 }

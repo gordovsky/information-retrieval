@@ -8,7 +8,6 @@
 
 //    public class SuffixTree
 //    {
-//        public char? Canonizator { get; set; }
 //        public string Word { get; set; }
 //        private int CurrentSuffixStartIndex { get; set; }
 //        private int CurrentSuffixEndIndex { get; set; }
