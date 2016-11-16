@@ -47,7 +47,7 @@
     <Compile Include="Lexer.cs" />
     <Compile Include="SuffixTree.cs" />
     <Compile Include="Index.cs" />
-    <Compile Include="Archiving.cs" />
+    <Compile Include="Compressing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

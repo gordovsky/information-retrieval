@@ -10,13 +10,8 @@ namespace Lexer
     }
     public class BasicLexer //: ILexer
     {
-        HashSet<char> ignoreList = new HashSet<char>("\t\n.,\r-;:[/|()[]?! <>?&•�*\"".ToCharArray());
-        private string[] stopList;
-
-        public BasicLexer()
-        {
-            stopList =
-                ("a,able,about,across,after,all,almost,also,am,among,an,and," +
+        HashSet<char> ignoreList = new HashSet<char>("0123456789\t\n.,\r-;:[/|()[]#?! <>?&•�*\"".ToCharArray());
+        private string[] stopList = ("a,able,about,across,after,all,almost,also,am,among,an,and," +
                 "any,are,as,at,be,because,been,but,by,can,cannot,could,dear," +
                 "did,do,does,either,else,ever,every,for,from,get,got,had,has," +
                 "have,he,her,hers,him,his,how,however,i,if,in,into,is,it,its," +
@@ -25,8 +20,10 @@ namespace Lexer
                 "say,says,she,should,since,so,some,than,that,the,their,them,then," +
                 "there,these,they,this,tis,to,too,twas,us,wants,was,we,were,what,when," +
                 "where,which,while,who,whom,why,will,with,would,yet,you,your").Split(',');
+        
+        public BasicLexer()
+        {
         }
-
 
         private bool isValidTerm(string term)
         {

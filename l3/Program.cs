@@ -6,7 +6,7 @@ using Index;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Archiving;
+using Compressing;
 
 namespace Program
 {
@@ -28,29 +28,45 @@ namespace Program
 
 
             List<Document> documents = new List<Document>();
+
+
             int id = 1;
-            foreach (string doc in Directory.GetFiles(littleDataSetPath))
+            foreach (string doc in Directory.GetFiles(reutersPath))
             {
                 string text = File.ReadAllText(doc);
                 documents.Add(new Document(id, Path.GetFileName(doc), text));
                 id++;
             }
 
+
+            Compressor.ShiftCode(511);
+
             InvertedIndex index = new InvertedIndex(documents);
-            
-            Compressor compressor = new Compressor(index);
-            compressor.WriteCompressedStringToFile(@"C:\Users\col403\Desktop\ir\");
+
+            Compressor.WriteStringToFile(index, @"C:\Users\col403\Desktop\ir\");
+            var compDict = Compressor.CompressedDictToString(index);
+            var compIndex = Compressor.CompressedInvIndexToString(index);
+
+
+            using (StreamWriter writer = new StreamWriter(@"C:\Users\col403\Desktop\ir\" + "compressed_dict.txt"))
+            {
+                writer.Write(compDict);
+            }
+            using (StreamWriter writer = new StreamWriter(@"C:\Users\col403\Desktop\ir\" + "compressed_index.txt"))
+            {
+                writer.Write(compIndex);
+            }
 
             //index.WriteStringToFile(@"C:\Users\col403\Desktop\ir\");
 
 
-            var indexElement1 = index.Dictionary.ElementAt(2500);
-            var indexElement2 = index.Dictionary.ElementAt(3990);
+            var indexElement1 = index.Index.ElementAt(2500);
+            var indexElement2 = index.Index.ElementAt(3990);
 
 
             stopwatch.Stop();
             Console.WriteLine("elapsed time: {0}", stopwatch.ElapsedMilliseconds);
-            Console.WriteLine("end...");
+            Console.WriteLine("fin...");
             Console.ReadKey();
         }
     }
