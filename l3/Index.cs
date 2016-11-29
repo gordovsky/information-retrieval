@@ -7,9 +7,13 @@ using System.IO;
 
 namespace Index
 {
-    class InvertedIndex
+    interface IIndex
     {
-        public SortedList<string, List<int>> Index = new SortedList<string, List<int>>();
+        List<int> GetValue(string input);
+    }
+    class InvertedIndex : IIndex
+    {
+        public Dictionary<string, List<int>> Index = new Dictionary<string, List<int>>();
         public int Count
         {
             get { return Index.Count; }
@@ -33,6 +37,10 @@ namespace Index
                     }
                 }
             }
+        }
+        List<int> IIndex.GetValue(string input)
+        {
+            return Index[input];
         }
     }
 }

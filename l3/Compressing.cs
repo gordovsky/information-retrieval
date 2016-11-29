@@ -49,7 +49,13 @@ namespace Compressing
         public static string CompressedInvIndexToString(InvertedIndex index)
         {
             StringBuilder s = new StringBuilder();
-            foreach (var term in index.Index)
+
+            var sortedDictionary = from pair in index.Index
+                                   orderby pair.Key
+                                   select pair;
+
+
+            foreach (var term in sortedDictionary)
             {
                 if (term.Value.Count > 1)
                 {
@@ -68,7 +74,10 @@ namespace Compressing
         public static void WriteStringToFile(InvertedIndex index,string path)
         {
             StringBuilder s = new StringBuilder();
-            foreach (var term in index.Index)
+            var items = from pair in index.Index
+                        orderby pair.Key
+                        select pair;
+            foreach (var term in items)
                 s.Append(term.Key);
             using (StreamWriter writer = new StreamWriter(path + "dict.txt"))
             {
@@ -83,7 +92,11 @@ namespace Compressing
 
             StringBuilder s = new StringBuilder();
 
-            foreach (var term in index.Index)
+            var sortedDictionary = from pair in index.Index
+                        orderby pair.Key
+                        select pair;
+
+            foreach (var term in sortedDictionary)
             {
                 if (k < 4)
                 {
