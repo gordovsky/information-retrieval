@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lexer;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace Index
 {
     class MapReduce
     {
-        public static ConcurrentBag<string> bag = new ConcurrentBag<string>();
-        public BlockingCollection<string> chunks = new BlockingCollection<string>(bag);
-        public ConcurrentDictionary<string, int> dict = new ConcurrentDictionary<string, int>();
+        static ConcurrentBag<KeyValuePair<string, int>> bag = new ConcurrentBag<KeyValuePair<string, int>>();
+        BlockingCollection<KeyValuePair<string, int>> chunks = new BlockingCollection<KeyValuePair<string, int>>(bag);
+        public ConcurrentDictionary<string, SortedSet<int>> dict = new ConcurrentDictionary<string, SortedSet<int>>();
         public IEnumerable<string>ProduceBlocks(string text)
         {
             int blockSize = 500;
@@ -21,7 +22,11 @@ namespace Index
             for (int i = 0; i < text.Length; i++)
             {
                 i = i + blockSize > text.Length - 1 ? text.Length - 1 : i + blockSize;
-                
+                while (i >= startPos && text[i] != ' ')
+                {
+                    i--;
+                }
+
                 if (i == startPos)
                 {
                     i = i + blockSize > (text.Length - 1) ? text.Length - 1 : i + blockSize;
@@ -37,44 +42,40 @@ namespace Index
             }
         }
 
-        void Map(string text)
+        void Map(Document doc)
         {
-            Parallel.ForEach(ProduceBlocks(text), wordBlock =>
+            Parallel.ForEach(ProduceBlocks(doc.Body), block =>
             {
-                string[] words = wordBlock.Split(' ');
-                StringBuilder buffer = new StringBuilder();
-
-                if (buffer.Length > 0)
+                BasicLexer lexer = new BasicLexer();
+                foreach (var lex in lexer.Tokenize(block))
                 {
-                    chunks.Add(buffer.ToString());
-                    buffer.Clear();
+                    chunks.Add(new KeyValuePair<string, int>(lex, doc.Id));
                 }
             });
-
             chunks.CompleteAdding();
         }
 
-        void Reduce()
+        void Reduce(int docId)
         {
             Parallel.ForEach(chunks.GetConsumingEnumerable(), word =>
             {
-                dict.AddOrUpdate(word, 1, (key, oldValue) => Interlocked.Increment(ref oldValue));
+                dict.AddOrUpdate(word.Key, new SortedSet<int> { docId }, (key, value) => { value.Add(docId); return value; }); //(word, 1, (key, oldValue) => Interlocked.Increment(ref oldValue));
             });
         }
-        public void Run(string text)
+        public void Run(Document doc)
         {
             if (chunks.IsAddingCompleted)
             {
-                bag = new ConcurrentBag<string>();
-                chunks = new BlockingCollection<string>(bag);
+                bag = new ConcurrentBag<KeyValuePair<string,int>>();
+                chunks = new BlockingCollection<KeyValuePair<string, int>>(bag);
             }
 
             ThreadPool.QueueUserWorkItem(delegate (object state)
             {
-                Map(text);
+                Map(doc);
             });
 
-            Reduce();
+            Reduce(doc.Id);
         }
     }
 }

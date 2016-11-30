@@ -15,64 +15,54 @@ namespace Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("test started...");
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-
-
-
-
             string dataPath = @"F:\data";
             string smallDataSetPath = @"C:\Users\col403\Desktop\ir\little data set";
             string wikiDataSetPath = @"C:\Users\col403\Desktop\ir\wiki data set";
             string certainDocumentPath = @"C:\Users\col403\Desktop\ir\little data set\10.txt";
-            string reutersPath= @"C:\Users\col403\Desktop\ir\reuters21578";
-            List<Document> documents = new List<Document>();
+            string reutersPath = @"C:\Users\col403\Desktop\ir\reuters21578";
 
+            Console.WriteLine("test started...");
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            int id = 1;
-            foreach (string doc in Directory.GetFiles(smallDataSetPath))
+            var documents = GetDocuments(smallDataSetPath);
+            
+            MapReduce mapReduce = new MapReduce();
+            foreach (var doc in documents)
             {
-                string text = File.ReadAllText(doc);
-                documents.Add(new Document(id, Path.GetFileName(doc), text));
-                id++;
+                mapReduce.Run(doc);
             }
 
-            MapReduce mapReduce = new MapReduce();
-            //mapReduce.Map(documents[0].Body);
-            //mapReduce.Reduce();
-            mapReduce.Run(documents[0].Body);
+            stopwatch.Stop();
+            Console.WriteLine("Map reduce elapsed time: {0}", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
 
             InvertedIndex index = new InvertedIndex(documents);
 
-            var answer = BoolSearch.Search("Music AND approximately NOT composers", index);
+            //var answer = BoolSearch.Search("Music AND approximately NOT composers", index);
 
             //Compressor.WriteStringToFile(index, @"C:\Users\col403\Desktop\ir\");
-            //var compDict = Compressor.CompressedDictToString(index);
-            //var compIndex = Compressor.CompressedInvIndexToString(index);
-
-
-            //using (StreamWriter writer = new StreamWriter(@"C:\Users\col403\Desktop\ir\" + "compressed_dict.txt"))
-            //{
-            //    writer.Write(compDict);
-            //}
-            //using (StreamWriter writer = new StreamWriter(@"C:\Users\col403\Desktop\ir\" + "compressed_index.txt"))
-            //{
-            //    writer.Write(compIndex);
-            //}
-
-            //index.WriteStringToFile(@"C:\Users\col403\Desktop\ir\");
-
-
-            //var indexElement1 = index.Index.ElementAt(2500);
-            //var indexElement2 = index.Index.ElementAt(3990);
+            var compDict = Compressor.CompressedDictToString(index);
+            var compIndex = Compressor.CompressedInvIndexToString(index);
 
 
             stopwatch.Stop();
             Console.WriteLine("elapsed time: {0}", stopwatch.ElapsedMilliseconds);
             Console.WriteLine("fin...");
             Console.ReadKey();
+        }
+        public static List<Document> GetDocuments(string path)
+        {
+            int id = 1;
+            List<Document> documents = new List<Document>();
+            foreach (string doc in Directory.GetFiles(path))
+            {
+                string text = File.ReadAllText(doc);
+                documents.Add(new Document(id, Path.GetFileName(doc), text));
+                id++;
+            }
+            return documents;
         }
     }
 }
